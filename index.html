@@ -256,7 +256,7 @@
     transition:transform .25s ease;
   }
   .name-tag .amt.bump{animation:pulse .35s ease;}
-  .name-tag .amt><small>{font-size:11px;font-weight:400;color:var(--chrome-dim);text-shadow:none;}
+  .name-tag .amt>small{font-size:11px;font-weight:400;color:var(--chrome-dim);text-shadow:none;}
   .name-tag .goal-line{
     font-size:11px;color:var(--chrome-dim);margin-top:2px;
   }
@@ -608,7 +608,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-// !!! ВСТАВЬ СВОЙ АНОНИМНЫЙ КЛЮЧ ВМЕСТО ТЕКСТА НИЖЕ !!!
+// Твои актуальные параметры подключения, вставленные напрямую в код:
 const SUPABASE_URL = "https://puybyreugdyrlhuruuku.supabase.co"; 
 const SUPABASE_KEY = "sb_publishable_lJrvDvrw1cCMW_rfwTtFkw_KNTYeg78";
 
@@ -664,7 +664,7 @@ async function saveToCloud() {
   }
 }
 
-// Каждые 5 секунд автоматически стягиваем обновления (если друг внес деньги)
+// Автоматически проверяем новые данные каждые 5 секунд
 setInterval(loadFromCloud, 5000);
 
 function fmt(n){
@@ -708,7 +708,7 @@ function bump(person){
   el.classList.add('bump');
 }
 
-/* ---------- CELEBRATION ---------- */
+/* ---------- АНИМАЦИЯ ПОЗДРАВЛЕНИЯ ---------- */
 function showToast(person){
   const toast = document.getElementById('celebrateToast');
   toast.style.setProperty('--accent-toast', TOAST_COLOR[person]);
