@@ -1,13 +1,20 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Тест подключения</title>
+</head>
 <body>
 <h1>Копилка работает</h1>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   const SUPABASE_URL = "https://puybyreugdyrlhuruuku.supabase.co";
   const SUPABASE_KEY = "sb_publishable_lJrvDvrw1cCMW_rfwTtFkw_KNTYeg78";
-  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  console.log("Supabase подключен успешно!");
+  
+  // Меняем название переменной на db, чтобы браузер не ругался!
+  const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  
+  console.log("Supabase подключен успешно!", db);
 </script>
 </body>
 </html>
