@@ -178,7 +178,7 @@
     transition: transform 0.4s ease, filter 0.4s ease, border-color .4s ease, box-shadow .4s ease;
   }
 
-  /* Neon glow and customization for bikes — общая рамка, цвет свой у каждого */
+  /* Neon glow and customization for bikes */
   .side-dema-moto .moto-img {
     --glow: var(--blue);
     filter: drop-shadow(0 0 14px rgba(79, 182, 229, 0.45));
@@ -256,7 +256,7 @@
     transition:transform .25s ease;
   }
   .name-tag .amt.bump{animation:pulse .35s ease;}
-  .name-tag .amt small{font-size:11px;font-weight:400;color:var(--chrome-dim);text-shadow:none;}
+  .name-tag .amt><small>{font-size:11px;font-weight:400;color:var(--chrome-dim);text-shadow:none;}
   .name-tag .goal-line{
     font-size:11px;color:var(--chrome-dim);margin-top:2px;
   }
@@ -391,7 +391,6 @@
     max-width:200px;
   }
   
-  /* REMOVED ARROWS FROM INPUT NUMBER */
   .amount-row input{
     width:100%;
     background:var(--glass-bg);
@@ -601,12 +600,20 @@
   </div>
 
   <footer>
-    Прогресс сохраняется в этом браузере. <button id="resetBtn">Сбросить всё</button>
+    Прогресс сохраняется в облаке. <button id="resetBtn">Сбросить всё</button>
   </footer>
 </div>
 
+<!-- Подключаем официальную библиотеку Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
-const STORAGE_KEY = 'moto-kopilka-data';
+// !!! ВСТАВЬ СВОЙ АНОНИМНЫЙ КЛЮЧ ВМЕСТО ТЕКСТА НИЖЕ !!!
+const SUPABASE_URL = "https://puybyreugdyrlhuruuku.supabase.co"; 
+const SUPABASE_KEY = "СЮДА_ВСТАВЬ_СВОЙ_ДЛИННЫЙ_ANON_KEY";
+
+const supabase = __supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 const GOALS = { dema: 44000, pasha: 31000 };
 const NAMES = { dema: 'Дёма', pasha: 'Паша' };
 const TOAST_COLOR = { dema: '#4fb6e5', pasha: '#5fd068' };
@@ -621,27 +628,44 @@ function setStatus(text){
   if(text) setTimeout(()=>{ if(document.getElementById('status').textContent === text) setStatus(''); }, 2500);
 }
 
-function loadState(){
-  try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(raw){
-      const parsed = JSON.parse(raw);
-      state.pasha = Object.assign({total:0,history:[],celebrated:false}, parsed.pasha);
-      state.dema = Object.assign({total:0,history:[],celebrated:false}, parsed.dema);
+// Загружаем данные из Supabase
+async function loadFromCloud() {
+  try {
+    const { data, error } = await supabase
+      .from('storage')
+      .select('value')
+      .eq('key', 'moto-data')
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error;
+
+    if (data && data.value) {
+      state.pasha = Object.assign({total:0,history:[],celebrated:false}, data.value.pasha);
+      state.dema = Object.assign({total:0,history:[],celebrated:false}, data.value.dema);
     }
-  }catch(e){
-    console.error('Не удалось прочитать сохранённые данные', e);
+    render();
+  } catch (e) {
+    console.error('Ошибка загрузки:', e);
+    setStatus('Ошибка загрузки данных из облака');
   }
-  render();
 }
 
-function saveState(){
-  try{
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }catch(e){
-    setStatus('Не удалось сохранить прогресс в этом браузере');
+// Сохраняем данные в Supabase
+async function saveToCloud() {
+  try {
+    const { error } = await supabase
+      .from('storage')
+      .upsert({ key: 'moto-data', value: state }, { onConflict: 'key' });
+
+    if (error) throw error;
+  } catch (e) {
+    console.error('Ошибка сохранения:', e);
+    setStatus('Не удалось сохранить данные на сервере');
   }
 }
+
+// Каждые 5 секунд автоматически стягиваем обновления (если друг внес деньги)
+setInterval(loadFromCloud, 5000);
 
 function fmt(n){
   return Number(n).toLocaleString('pl-PL');
@@ -665,7 +689,7 @@ function render(){
     document.getElementById('pct-'+id).textContent = pctValue + '%';
 
     const histEl = document.getElementById('history-'+id);
-    if(p.history.length === 0){
+    if(!p.history || p.history.length === 0){
       histEl.innerHTML = '<div class="history-empty">Пока без взносов</div>';
     } else {
       histEl.innerHTML = p.history.slice().reverse().slice(0,6).map(h=>{
@@ -684,7 +708,7 @@ function bump(person){
   el.classList.add('bump');
 }
 
-/* ---------- CELEBRATION: confetti + toast ---------- */
+/* ---------- CELEBRATION ---------- */
 function showToast(person){
   const toast = document.getElementById('celebrateToast');
   toast.style.setProperty('--accent-toast', TOAST_COLOR[person]);
@@ -777,28 +801,30 @@ function checkGoalReached(person){
   }
 }
 
-function addTransaction(person, delta){
+async function addTransaction(person, delta){
   if(!delta || delta <= 0) return;
   const p = state[person];
+  if(!p.history) p.history = [];
   p.total = Math.max(0, p.total + delta);
   p.history.push({ amount: delta, date: new Date().toLocaleDateString('pl-PL', {day:'2-digit', month:'2-digit'}) });
   checkGoalReached(person);
-  saveState();
   render();
   bump(person);
+  await saveToCloud();
 }
 
-function subTransaction(person, delta){
+async function subTransaction(person, delta){
   if(!delta || delta <= 0) return;
   const p = state[person];
+  if(!p.history) p.history = [];
   const actualDelta = Math.min(delta, p.total);
   if(actualDelta <= 0) return;
   p.total -= actualDelta;
   p.history.push({ amount: -actualDelta, date: new Date().toLocaleDateString('pl-PL', {day:'2-digit', month:'2-digit'}) });
   checkGoalReached(person);
-  saveState();
   render();
   bump(person);
+  await saveToCloud();
 }
 
 document.querySelectorAll('.btn').forEach(btn=>{
@@ -830,15 +856,15 @@ document.querySelectorAll('.amount-row input').forEach(inp=>{
   });
 });
 
-document.getElementById('resetBtn').addEventListener('click', ()=>{
+document.getElementById('resetBtn').addEventListener('click', async ()=>{
   if(confirm('Точно сбросить всю копилку? Это удалит все взносы у обоих.')){
     state = { pasha:{total:0,history:[],celebrated:false}, dema:{total:0,history:[],celebrated:false} };
-    saveState();
     render();
+    await saveToCloud();
   }
 });
 
-loadState();
+loadFromCloud();
 </script>
 </body>
 </html>
