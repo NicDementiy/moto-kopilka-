@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Копилка на мотоцикл</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0e0f12;
+    --bg-light: #1e2126;
+    --steel: #2b2f36;
+    --steel-line: #383d45;
+    --chrome: #eef0f3;
+    --chrome-dim: #8b9099;
+    --amber: #ff7a1a;
+    --blue: #4fb6e5;
+    --green: #5fd068;
+    --red: #e5484d;
+    --radius: 18px;
+    --glass-bg: rgba(30,33,38,0.45);
+    --glass-border: rgba(255,255,255,0.09);
+  }
+  *{box-sizing:border-box;}
+  @keyframes fadeUp{
+    from{opacity:0; transform:translateY(14px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+  @keyframes flicker{
+    0%,100%{opacity:1;}
+    50%{opacity:.75;}
+  }
+  @keyframes pulse{
+    0%{transform:scale(1);}
+    35%{transform:scale(1.1);}
+    100%{transform:scale(1);}
+  }
+  @keyframes bob{
+    0%,100%{transform:translateY(0);}
+    50%{transform:translateY(-2px);}
+  }
+  @keyframes drift1{
+    0%,100%{transform:translate(0,0) scale(1);}
+    50%{transform:translate(40px,-30px) scale(1.1);}
+  }
+  @keyframes drift2{
+    0%,100%{transform:translate(0,0) scale(1);}
+    50%{transform:translate(-30px,30px) scale(1.08);}
+  }
+  @keyframes sheen{
+    0%{transform:translateY(100%);}
+    100%{transform:translateY(-220%);}
+  }
+
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--chrome);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    padding:36px 16px 80px;
+    position:relative;
+    overflow-x:hidden;
+  }
+  .blob{
+    position:fixed;
+    border-radius:50%;
+    filter:blur(90px);
+    z-index:0;
+    pointer-events:none;
+    opacity:0.35;
+  }
+  .blob.b1{
+    width:480px;height:480px;
+    top:-160px;left:-120px;
+    background:radial-gradient(circle, var(--amber), transparent 70%);
+    animation:drift1 16s ease-in-out infinite;
+  }
+  .blob.b2{
+    width:520px;height:520px;
+    bottom:-200px;right:-140px;
+    background:radial-gradient(circle, var(--blue), transparent 70%);
+    animation:drift2 18s ease-in-out infinite;
+  }
+
+  .wrap{max-width:1100px;margin:0 auto;position:relative;z-index:1;}
+
+  .stripe{
+    height:6px;
+    background:repeating-linear-gradient(90deg, var(--amber) 0 28px, transparent 28px 56px);
+    opacity:0.6;
+    border-radius:4px;
+    margin-bottom:28px;
+    box-shadow:0 0 18px rgba(255,122,26,0.45);
+  }
+
+  header{text-align:center;margin-bottom:22px;animation:fadeUp .6s ease both;}
+  .header-icon{
+    width:46px;height:46px;margin:0 auto 10px;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--amber);
+    filter:drop-shadow(0 0 12px rgba(255,122,26,0.6));
+    animation:flicker 3.2s ease-in-out infinite;
+  }
+  .eyebrow{
+    font-family:'Oswald',sans-serif;
+    text-transform:uppercase;
+    letter-spacing:0.35em;
+    font-size:12px;
+    color:var(--amber);
+    margin-bottom:8px;
+  }
+  h1{
+    font-family:'Oswald',sans-serif;
+    font-weight:700;
+    font-size:clamp(30px,6vw,48px);
+    margin:0;
+    letter-spacing:0.01em;
+    text-transform:uppercase;
+    background:linear-gradient(135deg, #ffffff 0%, var(--chrome) 30%, var(--amber) 70%, var(--blue) 100%);
+    background-size:200% auto;
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    text-shadow:0 2px 30px rgba(0,0,0,0.5);
+  }
+  .sub{color:var(--chrome-dim);font-size:14px;margin-top:8px;}
+
+  .combo{
+    text-align:center;
+    font-size:13px;
+    color:var(--chrome-dim);
+    margin-bottom:28px;
+    background:var(--glass-bg);
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+    border:1px solid var(--glass-border);
+    border-radius:99px;
+    padding:10px 20px;
+    max-width:380px;
+    margin-left:auto;margin-right:auto;
+    box-shadow:0 8px 30px -14px rgba(0,0,0,0.6);
+  }
+  .combo b{color:var(--chrome);font-family:'Oswald',sans-serif;font-weight:600;}
+
+  /* MAIN CONTENT LAYOUT WITH MOTORCYCLES */
+  .main-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
+  }
+
+  /* MOTORCYCLE BLOCKS */
+  .moto-block {
+    flex: 0 0 240px;
+    width: 240px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeUp .8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .moto-img {
+    width: 100%;
+    height: 168px;
+    object-fit: contain;
+    object-position: center;
+    border-radius: 16px;
+    padding: 10px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--glass-border);
+    transition: transform 0.4s ease, filter 0.4s ease, border-color .4s ease, box-shadow .4s ease;
+  }
+
+  /* Neon glow and customization for bikes — общая рамка, цвет свой у каждого */
+  .side-dema-moto .moto-img {
+    --glow: var(--blue);
+    filter: drop-shadow(0 0 14px rgba(79, 182, 229, 0.45));
+    border-color: rgba(79, 182, 229, 0.35);
+    box-shadow: 0 14px 32px -16px rgba(0,0,0,0.7), 0 0 0 1px rgba(79,182,229,0.12), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .side-dema-moto .moto-img:hover {
+    transform: scale(1.05) translateY(-5px);
+    filter: drop-shadow(0 0 26px rgba(79, 182, 229, 0.75));
+    border-color: rgba(79, 182, 229, 0.6);
+  }
+
+  .side-pasha-moto .moto-img {
+    --glow: var(--green);
+    filter: drop-shadow(0 0 14px rgba(95, 208, 104, 0.45));
+    border-color: rgba(95, 208, 104, 0.35);
+    box-shadow: 0 14px 32px -16px rgba(0,0,0,0.7), 0 0 0 1px rgba(95,208,104,0.12), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .side-pasha-moto .moto-img:hover {
+    transform: scale(1.05) translateY(-5px);
+    filter: drop-shadow(0 0 26px rgba(95, 208, 104, 0.75));
+    border-color: rgba(95, 208, 104, 0.6);
+  }
+
+  /* TANK SHELL */
+  .tanks-shell{
+    flex: 1 1 650px;
+    max-width: 660px;
+    display:flex;
+    align-items:stretch;
+    justify-content:center;
+    gap:0;
+    animation:fadeUp .6s ease .1s both;
+  }
+  .divider{
+    width:1px;
+    background:linear-gradient(180deg, transparent, var(--glass-border) 15%, var(--glass-border) 85%, transparent);
+    margin:0 10px;
+    flex:0 0 1px;
+  }
+  .side{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:0 6px;
+    min-width:0;
+  }
+
+  .name-tag{
+    font-family:'Oswald',sans-serif;
+    background:var(--glass-bg);
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+    border:1px solid var(--glass-border);
+    border-radius:14px;
+    padding:10px 18px;
+    margin-bottom:18px;
+    text-align:center;
+    width: 100%;
+    max-width: 200px;
+    box-shadow:0 10px 30px -14px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .side[data-id="dema"] .name-tag{transform:rotate(-1.2deg);}
+  .side[data-id="pasha"] .name-tag{transform:rotate(1.2deg);}
+  .name-tag .who{
+    font-size:17px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;
+    color:var(--chrome);
+  }
+  .name-tag .amt{
+    display:block;
+    font-size:21px;font-weight:700;
+    color:var(--accent);
+    text-shadow:0 0 16px var(--accent);
+    transition:transform .25s ease;
+  }
+  .name-tag .amt.bump{animation:pulse .35s ease;}
+  .name-tag .amt small{font-size:11px;font-weight:400;color:var(--chrome-dim);text-shadow:none;}
+  .name-tag .goal-line{
+    font-size:11px;color:var(--chrome-dim);margin-top:2px;
+  }
+
+  .side[data-id="pasha"]{--accent: var(--amber);}
+  .side[data-id="dema"]{--accent: var(--blue);}
+
+  .control-row{
+    display:flex;
+    align-items:flex-end;
+    gap:10px;
+  }
+  .side[data-id="pasha"] .control-row{flex-direction:row-reverse;}
+
+  /* TANK GAUGE */
+  .tank{
+    position:relative;
+    width:100px;
+    height:280px;
+    border-radius:50px;
+    background:linear-gradient(160deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01) 40%, rgba(0,0,0,0.2));
+    background-color:var(--glass-bg);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    border:1px solid var(--glass-border);
+    box-shadow:inset 0 2px 10px rgba(0,0,0,0.55), 0 18px 36px -18px rgba(0,0,0,0.75);
+    overflow:hidden;
+  }
+  .tank::before{
+    content:'';
+    position:absolute;
+    top:10px;bottom:10px;left:12px;
+    width:14px;
+    border-radius:20px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.02));
+    z-index:3;
+  }
+  .tank-sheen{
+    position:absolute;
+    left:-40%;width:60%;height:160%;top:-30%;
+    background:linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.16) 48%, transparent 65%);
+    transform:translateY(100%);
+    animation:sheen 6s ease-in-out infinite;
+    z-index:4;
+    pointer-events:none;
+  }
+  .tank-cap{
+    position:absolute;
+    top:-9px;left:50%;
+    transform:translateX(-50%);
+    width:32px;height:16px;
+    background:linear-gradient(180deg, #565c66, #2b2f36);
+    border:1px solid var(--glass-border);
+    border-radius:7px 7px 3px 3px;
+    z-index:5;
+    box-shadow:0 2px 6px rgba(0,0,0,0.4);
+  }
+  .tank-ticks{
+    position:absolute;
+    right:8px;top:14px;bottom:14px;
+    width:8px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    z-index:3;
+  }
+  .tank-ticks span{
+    display:block;height:1px;width:100%;
+    background:rgba(255,255,255,0.12);
+  }
+  .tank-liquid{
+    position:absolute;
+    bottom:0;left:0;right:0;
+    height:0%;
+    background:linear-gradient(180deg, color-mix(in srgb, var(--accent) 80%, white) 0%, var(--accent) 22%, color-mix(in srgb, var(--accent) 75%, black) 100%);
+    box-shadow:0 0 24px 2px color-mix(in srgb, var(--accent) 55%, transparent);
+    transition:height .6s cubic-bezier(.22,.9,.36,1);
+    z-index:1;
+  }
+  .tank-liquid::after{
+    content:'';
+    position:absolute;
+    top:-3px;left:0;right:0;height:8px;
+    background:color-mix(in srgb, var(--accent) 55%, white);
+    border-radius:50%/7px;
+    opacity:0.8;
+    animation:bob 2.6s ease-in-out infinite;
+  }
+  .tank-pct{
+    position:absolute;
+    top:12px;left:0;right:0;
+    text-align:center;
+    font-family:'Oswald',sans-serif;
+    font-size:11px;
+    color:var(--chrome);
+    text-shadow:0 1px 4px rgba(0,0,0,0.6);
+    z-index:5;
+    padding: 0 4px;
+    white-space: nowrap;
+  }
+
+  .btn{
+    border:none;
+    border-radius:14px;
+    width:58px;
+    height:68px;
+    flex:0 0 auto;
+    font-size:25px;
+    font-weight:700;
+    cursor:pointer;
+    transition:transform .14s ease, filter .14s ease, box-shadow .14s ease;
+    align-self:flex-end;
+    margin-bottom:4px;
+    position:relative;
+    overflow:hidden;
+  }
+  .btn::after{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg, rgba(255,255,255,0.35), transparent 60%);
+    opacity:0.6;
+  }
+  .btn:active{transform:scale(0.9);}
+  .btn.plus{background:linear-gradient(160deg, #82e98c, var(--green));color:#0c1a0e;box-shadow:0 10px 22px -8px rgba(95,208,104,0.65);}
+  .btn.minus{background:linear-gradient(160deg, #f17b7e, var(--red));color:#2b0a0b;box-shadow:0 10px 22px -8px rgba(229,72,77,0.65);}
+  .btn:hover{filter:brightness(1.12);transform:translateY(-3px);}
+
+  .amount-row{
+    margin-top:16px;
+    width:100%;
+    max-width:200px;
+  }
+  
+  /* REMOVED ARROWS FROM INPUT NUMBER */
+  .amount-row input{
+    width:100%;
+    background:var(--glass-bg);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    border:1px solid var(--glass-border);
+    border-radius:10px;
+    color:var(--chrome);
+    font-family:'Oswald',sans-serif;
+    font-size:16px;
+    text-align:center;
+    padding:10px 10px;
+    transition:border-color .15s ease, box-shadow .15s ease;
+    -moz-appearance: textfield;
+  }
+  .amount-row input::-webkit-outer-spin-button,
+  .amount-row input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .amount-row input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);}
+  .amount-row input::placeholder{color:var(--chrome-dim);font-family:'Inter',sans-serif;font-size:13px;}
+
+  .history{
+    margin-top:14px;
+    width:100%;
+    max-width:220px;
+    border-top:1px dashed var(--glass-border);
+    padding-top:10px;
+    max-height:96px;
+    overflow-y:auto;
+  }
+  .history-empty{color:var(--chrome-dim);font-size:12px;font-style:italic;text-align:center;}
+  .h-item{
+    display:flex;justify-content:space-between;
+    font-size:12px;color:var(--chrome-dim);
+    padding:3px 0;
+  }
+  .h-item .amt.pos{color:var(--green);}
+  .h-item .amt.neg{color:var(--red);}
+
+  /* CELEBRATION TOAST */
+  .celebrate-toast{
+    position:fixed;
+    top:24px;left:50%;
+    transform:translateX(-50%) translateY(-20px);
+    background:var(--glass-bg);
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+    border:1px solid var(--glass-border);
+    border-radius:16px;
+    padding:16px 26px;
+    font-family:'Oswald',sans-serif;
+    font-size:16px;
+    text-align:center;
+    color:var(--chrome);
+    box-shadow:0 20px 50px -16px rgba(0,0,0,0.8);
+    opacity:0;
+    z-index:100;
+    pointer-events:none;
+    transition:opacity .4s ease, transform .4s ease;
+  }
+  .celebrate-toast.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+  }
+  .celebrate-toast b{
+    color:var(--accent-toast, var(--amber));
+    text-shadow:0 0 16px var(--accent-toast, var(--amber));
+  }
+  #confetti-canvas{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+    z-index:99;
+  }
+
+  /* RESPONSIVE DESIGN */
+  @media (max-width:940px){
+    .main-container {
+      flex-direction: column;
+      gap: 22px;
+    }
+    .moto-block {
+      order: 2;
+      flex: 0 0 auto;
+      width: 100%;
+      max-width: 320px;
+    }
+    .moto-img{height:140px;}
+    .side-dema-moto { order: 2; }
+    .tanks-shell { order: 1; width: 100%; }
+    .side-pasha-moto { order: 3; }
+  }
+
+  @media (max-width:640px){
+    .tanks-shell{flex-direction:column;align-items:center;}
+    .divider{width:60%;height:1px;margin:22px auto;}
+    .side{padding:0;width:100%;max-width:280px;}
+    .tank{width:84px;height:230px;}
+  }
+
+  footer{
+    text-align:center;
+    margin-top:40px;
+    color:var(--chrome-dim);
+    font-size:12px;
+    animation:fadeUp .6s ease .26s both;
+  }
+  footer button{
+    background:none;border:none;color:var(--chrome-dim);
+    text-decoration:underline;cursor:pointer;font-size:12px;
+  }
+  .status{
+    text-align:center;color:var(--chrome-dim);font-size:13px;margin-bottom:16px;min-height:18px;
+  }
+</style>
+</head>
+<body>
+<canvas id="confetti-canvas"></canvas>
+<div class="celebrate-toast" id="celebrateToast"></div>
+<div class="blob b1"></div>
+<div class="blob b2"></div>
+<div class="wrap">
+  <div class="stripe"></div>
+  <header>
+    <div class="header-icon">
+      <svg viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="5.5" cy="17.5" r="3.5"/>
+        <circle cx="18.5" cy="17.5" r="3.5"/>
+        <path d="M5.5 17.5 L10 10 H14 L18.5 17.5"/>
+        <path d="M10 10 L8 6 H6"/>
+        <path d="M14 10 L16 7 L19 7"/>
+        <path d="M10 10 L13 14 H17"/>
+      </svg>
+    </div>
+    <div class="eyebrow">Гараж на двоих</div>
+    <h1>Копилка на мотоцикл</h1>
+    <div class="sub">Дёма и Паша копят каждый на свой байк.</div>
+  </header>
+
+  <div class="status" id="status"></div>
+  <div class="combo">Вместе собрано: <b id="comboTotal">0 zł</b> из <b id="comboGoal">75 000 zł</b></div>
+
+  <div class="main-container">
+
+    <div class="moto-block side-dema-moto">
+      <img src="1.png" alt="Мотоцикл Дёмы — Suzuki" class="moto-img">
+    </div>
+
+    <div class="tanks-shell">
+      <div class="side" data-id="dema">
+        <div class="name-tag">
+          <span class="who">Дёма</span>
+          <span class="amt" id="amt-dema">0 <small>zł</small></span>
+          <span class="goal-line">цель: 44 000 zł</span>
+        </div>
+        <div class="control-row">
+          <button class="btn minus" data-person="dema" data-action="sub">−</button>
+          <button class="btn plus" data-person="dema" data-action="add">+</button>
+          <div class="tank">
+            <div class="tank-cap"></div>
+            <div class="tank-pct" id="pct-dema">0%</div>
+            <div class="tank-ticks"><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="tank-liquid" id="liquid-dema"></div>
+            <div class="tank-sheen"></div>
+          </div>
+        </div>
+        <div class="amount-row">
+          <input type="number" id="amount-dema" placeholder="сумма, zł" min="0">
+        </div>
+        <div class="history" id="history-dema"><div class="history-empty">Пока без взносов</div></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="side" data-id="pasha">
+        <div class="name-tag">
+          <span class="who">Паша</span>
+          <span class="amt" id="amt-pasha">0 <small>zł</small></span>
+          <span class="goal-line">цель: 31 000 zł</span>
+        </div>
+        <div class="control-row">
+          <div class="tank">
+            <div class="tank-cap"></div>
+            <div class="tank-pct" id="pct-pasha">0%</div>
+            <div class="tank-ticks"><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="tank-liquid" id="liquid-pasha"></div>
+            <div class="tank-sheen"></div>
+          </div>
+          <button class="btn plus" data-person="pasha" data-action="add">+</button>
+          <button class="btn minus" data-person="pasha" data-action="sub">−</button>
+        </div>
+        <div class="amount-row">
+          <input type="number" id="amount-pasha" placeholder="сумма, zł" min="0">
+        </div>
+        <div class="history" id="history-pasha"><div class="history-empty">Пока без взносов</div></div>
+      </div>
+    </div>
+
+    <div class="moto-block side-pasha-moto">
+      <img src="2.png" alt="Мотоцикл Паши — Kawasaki Ninja" class="moto-img">
+    </div>
+
+  </div>
+
+  <footer>
+    Прогресс сохраняется в этом браузере. <button id="resetBtn">Сбросить всё</button>
+  </footer>
+</div>
+
+<script>
+const STORAGE_KEY = 'moto-kopilka-data';
+const GOALS = { dema: 44000, pasha: 31000 };
+const NAMES = { dema: 'Дёма', pasha: 'Паша' };
+const TOAST_COLOR = { dema: '#4fb6e5', pasha: '#5fd068' };
+
+let state = {
+  pasha: { total: 0, history: [], celebrated: false },
+  dema: { total: 0, history: [], celebrated: false }
+};
+
+function setStatus(text){
+  document.getElementById('status').textContent = text;
+  if(text) setTimeout(()=>{ if(document.getElementById('status').textContent === text) setStatus(''); }, 2500);
+}
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      state.pasha = Object.assign({total:0,history:[],celebrated:false}, parsed.pasha);
+      state.dema = Object.assign({total:0,history:[],celebrated:false}, parsed.dema);
+    }
+  }catch(e){
+    console.error('Не удалось прочитать сохранённые данные', e);
+  }
+  render();
+}
+
+function saveState(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }catch(e){
+    setStatus('Не удалось сохранить прогресс в этом браузере');
+  }
+}
+
+function fmt(n){
+  return Number(n).toLocaleString('pl-PL');
+}
+
+function render(){
+  const total = state.pasha.total + state.dema.total;
+  const totalGoal = GOALS.pasha + GOALS.dema;
+  document.getElementById('comboTotal').textContent = fmt(total) + ' zł';
+  document.getElementById('comboGoal').textContent = fmt(totalGoal) + ' zł';
+
+  ['pasha','dema'].forEach(id=>{
+    const p = state[id];
+    const amtEl = document.getElementById('amt-'+id);
+    amtEl.innerHTML = fmt(p.total) + ' <small>zł</small>';
+
+    const pct = Math.min(p.total / GOALS[id], 1);
+    document.getElementById('liquid-'+id).style.height = (pct*100) + '%';
+
+    let pctValue = parseFloat((pct * 100).toFixed(2));
+    document.getElementById('pct-'+id).textContent = pctValue + '%';
+
+    const histEl = document.getElementById('history-'+id);
+    if(p.history.length === 0){
+      histEl.innerHTML = '<div class="history-empty">Пока без взносов</div>';
+    } else {
+      histEl.innerHTML = p.history.slice().reverse().slice(0,6).map(h=>{
+        const cls = h.amount >= 0 ? 'pos' : 'neg';
+        const sign = h.amount >= 0 ? '+' : '';
+        return `<div class="h-item"><span>${h.date}</span><span class="amt ${cls}">${sign}${fmt(h.amount)} zł</span></div>`;
+      }).join('');
+    }
+  });
+}
+
+function bump(person){
+  const el = document.getElementById('amt-'+person);
+  el.classList.remove('bump');
+  void el.offsetWidth;
+  el.classList.add('bump');
+}
+
+/* ---------- CELEBRATION: confetti + toast ---------- */
+function showToast(person){
+  const toast = document.getElementById('celebrateToast');
+  toast.style.setProperty('--accent-toast', TOAST_COLOR[person]);
+  toast.innerHTML = `🎉 Поздравляем, <b>${NAMES[person]}</b>! Цель достигнута — пора выбирать байк!`;
+  toast.classList.add('show');
+  clearTimeout(toast._hideTimer);
+  toast._hideTimer = setTimeout(()=> toast.classList.remove('show'), 4200);
+}
+
+function launchConfetti(person){
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = window.innerWidth * dpr;
+  canvas.height = window.innerHeight * dpr;
+  canvas.style.width = window.innerWidth + 'px';
+  canvas.style.height = window.innerHeight + 'px';
+  ctx.scale(dpr, dpr);
+
+  const colors = [TOAST_COLOR[person], '#ff7a1a', '#ffd54f', '#ffffff', TOAST_COLOR[person==='dema'?'pasha':'dema']];
+  const W = window.innerWidth, H = window.innerHeight;
+  const particles = [];
+  const COUNT = 160;
+  for(let i=0;i<COUNT;i++){
+    particles.push({
+      x: Math.random()*W,
+      y: -20 - Math.random()*H*0.5,
+      size: 5 + Math.random()*7,
+      color: colors[Math.floor(Math.random()*colors.length)],
+      speedY: 2 + Math.random()*3.5,
+      speedX: (Math.random()-0.5)*2.4,
+      rotation: Math.random()*360,
+      rotSpeed: (Math.random()-0.5)*12,
+      shape: Math.random() > 0.5 ? 'rect' : 'circle',
+      life: 1
+    });
+  }
+
+  let frame = 0;
+  const maxFrames = 260;
+
+  function tick(){
+    frame++;
+    ctx.clearRect(0,0,W,H);
+    let alive = false;
+    particles.forEach(p=>{
+      p.x += p.speedX;
+      p.y += p.speedY;
+      p.rotation += p.rotSpeed;
+      p.speedY += 0.02;
+      if(frame > maxFrames - 60) p.life -= 1/60;
+      if(p.y < H + 30 && p.life > 0) alive = true;
+
+      ctx.save();
+      ctx.globalAlpha = Math.max(p.life, 0);
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation * Math.PI/180);
+      ctx.fillStyle = p.color;
+      if(p.shape === 'rect'){
+        ctx.fillRect(-p.size/2, -p.size/3, p.size, p.size*0.66);
+      } else {
+        ctx.beginPath();
+        ctx.arc(0,0,p.size/2,0,Math.PI*2);
+        ctx.fill();
+      }
+      ctx.restore();
+    });
+
+    if(frame < maxFrames && alive){
+      requestAnimationFrame(tick);
+    } else {
+      ctx.clearRect(0,0,W,H);
+    }
+  }
+  requestAnimationFrame(tick);
+}
+
+function celebrate(person){
+  showToast(person);
+  launchConfetti(person);
+}
+
+function checkGoalReached(person){
+  const p = state[person];
+  if(!p.celebrated && p.total >= GOALS[person]){
+    p.celebrated = true;
+    celebrate(person);
+  } else if(p.total < GOALS[person]){
+    p.celebrated = false;
+  }
+}
+
+function addTransaction(person, delta){
+  if(!delta || delta <= 0) return;
+  const p = state[person];
+  p.total = Math.max(0, p.total + delta);
+  p.history.push({ amount: delta, date: new Date().toLocaleDateString('pl-PL', {day:'2-digit', month:'2-digit'}) });
+  checkGoalReached(person);
+  saveState();
+  render();
+  bump(person);
+}
+
+function subTransaction(person, delta){
+  if(!delta || delta <= 0) return;
+  const p = state[person];
+  const actualDelta = Math.min(delta, p.total);
+  if(actualDelta <= 0) return;
+  p.total -= actualDelta;
+  p.history.push({ amount: -actualDelta, date: new Date().toLocaleDateString('pl-PL', {day:'2-digit', month:'2-digit'}) });
+  checkGoalReached(person);
+  saveState();
+  render();
+  bump(person);
+}
+
+document.querySelectorAll('.btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const person = btn.dataset.person;
+    const action = btn.dataset.action;
+    const input = document.getElementById('amount-'+person);
+    const val = parseFloat(input.value);
+    if(!val || val <= 0){
+      input.focus();
+      return;
+    }
+    if(action === 'add') addTransaction(person, val);
+    else subTransaction(person, val);
+    input.value = '';
+  });
+});
+
+document.querySelectorAll('.amount-row input').forEach(inp=>{
+  inp.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){
+      const person = inp.id.replace('amount-','');
+      const val = parseFloat(inp.value);
+      if(val && val > 0){
+        addTransaction(person, val);
+        inp.value = '';
+      }
+    }
+  });
+});
+
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  if(confirm('Точно сбросить всю копилку? Это удалит все взносы у обоих.')){
+    state = { pasha:{total:0,history:[],celebrated:false}, dema:{total:0,history:[],celebrated:false} };
+    saveState();
+    render();
+  }
+});
+
+loadState();
+</script>
+</body>
+</html>
