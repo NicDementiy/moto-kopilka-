@@ -854,6 +854,8 @@ document.querySelectorAll('.amount-row input').forEach(inp=>{
       }
     }
   });
+});
+  
 document.getElementById('resetBtn').addEventListener('click', async ()=>{
   if(confirm('Точно сбросить всю копилку? Это удалит все взносы у обоих.')){
     state = { pasha:{total:0,history:[],celebrated:false}, dema:{total:0,history:[],celebrated:false} };
